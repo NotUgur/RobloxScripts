@@ -1,5 +1,15 @@
 Roblox Scripts That I made, I will update It at my free time.
 
+Currently Activity:
+
+Loader: %5
+Laundry Simulator Script: %40
+Any other game script: %0
+
+
+Laundry Simulator Script is published and anyone can use it but doesnt working properly since I didnt got time to finish it, I will finish it whenever.
+
+
 TODO:
 
 -- Finish Laundry Simulator Script.
