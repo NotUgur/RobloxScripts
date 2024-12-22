@@ -8,3 +8,4 @@ TODO:
 -- Make autofarm script to the GYM Star Simulator.
 -- Make autofarm script to the Tug of War Simuator.
 -- Make an universal ESP and Aimbot script that bypasses many anticheat.
+-- Make an Loader to the script to access all of the scripts in just one script, and set-up autoexec feature for it.
