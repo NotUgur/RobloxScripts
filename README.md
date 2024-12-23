@@ -11,6 +11,13 @@ Universal Script Is Published and anyone can use it but some of the features doe
 Laundry Simulator Script is published and anyone can use it but doesnt working properly since I didnt got time to finish it, I will finish it whenever.
 
 
+All of the Scripts are tested on the following executors:
+
+Solara: Working fully.
+Xeno: Working fully.
+Delta Mobile: Working fully but esp is buggy due to mobile graphics of the game.
+
+
 TODO:
 
 -- Finish Laundry Simulator Script.
