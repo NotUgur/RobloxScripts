@@ -2,7 +2,8 @@ Roblox Scripts That I made, I will update It at my free time.
 
 Currently Activity:
 
-Loader: %5
+Loadstrings = %0
+Loader: %0
 Laundry Simulator Script: %40
 Universal Script: %50
 Any other game script: %0
