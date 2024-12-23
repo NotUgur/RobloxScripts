@@ -4,9 +4,10 @@ Currently Activity:
 
 Loader: %5
 Laundry Simulator Script: %40
+Universal Script: %50
 Any other game script: %0
 
-
+Universal Script Is Published and anyone can use it but some of the features doesnt working properly, I will fix them whenever I finish the Laundry Simulator Script.
 Laundry Simulator Script is published and anyone can use it but doesnt working properly since I didnt got time to finish it, I will finish it whenever.
 
 
