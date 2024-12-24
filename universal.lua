@@ -27,6 +27,42 @@ local nameESPEnabled = false
 local boxESPObjects = {}
 local nameESPObjects = {}
 
+-- WalkSpeed Slider
+Tab:CreateSlider({
+    Name = "WalkSpeed",
+    Info = "Change your WalkSpeed.",
+    Range = {16, 500},
+    Increment = 1,
+    CurrentValue = player.Character.Humanoid.WalkSpeed,
+    Callback = function(Value)
+        player.Character.Humanoid.WalkSpeed = Value
+    end
+})
+
+-- JumpPower Slider
+Tab:CreateSlider({
+    Name = "JumpPower",
+    Info = "Change your JumpPower.",
+    Range = {50, 500},
+    Increment = 1,
+    CurrentValue = player.Character.Humanoid.JumpPower,
+    Callback = function(Value)
+        player.Character.Humanoid.JumpPower = Value
+    end
+})
+
+-- Gravity Slider
+Tab:CreateSlider({
+    Name = "Gravity",
+    Info = "Change the game's gravity.",
+    Range = {0, 500},
+    Increment = 1,
+    CurrentValue = Workspace.Gravity,
+    Callback = function(Value)
+        Workspace.Gravity = Value
+    end
+})
+
 -- Box and Name ESP Functions
 local function createESP(plr)
     local box = Drawing.new("Square")
@@ -53,12 +89,12 @@ local function createESP(plr)
             if onScreen then
                 local scaleFactor = 1 / (screenPos.Z / 10)
 
-                -- Box-ESP settings (Maintains size and stays centered)
+
                 box.Visible = boxESPEnabled
                 box.Position = Vector2.new(screenPos.X - 50 * scaleFactor, screenPos.Y - 75 * scaleFactor)
                 box.Size = Vector2.new(100 * scaleFactor, 150 * scaleFactor)
 
-                -- Name-ESP settings (Maintains size and stays centered)
+           
                 nameTag.Visible = nameESPEnabled
                 nameTag.Position = Vector2.new(screenPos.X, screenPos.Y - 40 * scaleFactor)
             else
@@ -142,41 +178,7 @@ Tab:CreateInput({
     end,
 })
 
--- WalkSpeed Slider
-Tab:CreateSlider({
-    Name = "WalkSpeed",
-    Info = "Change your WalkSpeed.",
-    Range = {16, 500},
-    Increment = 1,
-    CurrentValue = player.Character.Humanoid.WalkSpeed,
-    Callback = function(Value)
-        player.Character.Humanoid.WalkSpeed = Value
-    end
-})
 
--- JumpPower Slider
-Tab:CreateSlider({
-    Name = "JumpPower",
-    Info = "Change your JumpPower.",
-    Range = {50, 500},
-    Increment = 1,
-    CurrentValue = player.Character.Humanoid.JumpPower,
-    Callback = function(Value)
-        player.Character.Humanoid.JumpPower = Value
-    end
-})
-
--- Gravity Slider
-Tab:CreateSlider({
-    Name = "Gravity",
-    Info = "Change the game's gravity.",
-    Range = {0, 500},
-    Increment = 1,
-    CurrentValue = Workspace.Gravity,
-    Callback = function(Value)
-        Workspace.Gravity = Value
-    end
-})
 
 -- Box-ESP Toggle
 Tab:CreateToggle({
