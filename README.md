@@ -4,24 +4,21 @@ Currently Activity:
 
 Loadstrings = %0
 Loader: %0
-Laundry Simulator Script: %40
-Universal Script: %50
+Laundry Simulator Script: %100
+Universal Script: %90 but dont use it sucks.
 Any other game script: %0
 
-Universal Script Is Published and anyone can use it but some of the features doesnt working properly, I will fix them whenever I finish the Laundry Simulator Script.
-Laundry Simulator Script is published and anyone can use it but doesnt working properly since I didnt got time to finish it, I will finish it whenever.
+Laundry Simulator Script is published and anyone can use it, It works fully.
 
 
 All of the Scripts are tested on the following executors:
 
 Solara: Working fully.
 Xeno: Working fully.
-Delta Mobile: Working fully but esp is buggy due to mobile graphics of the game.
-
+Delta Mobile: Working fully.
 
 TODO:
 
--- Finish Laundry Simulator Script.
 -- Make autofarm script to the Goal Kick Simulator.
 -- Make autofarm script to the Training Simulator.
 -- Make autofarm script to the GYM Star Simulator.
