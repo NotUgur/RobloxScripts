@@ -1,321 +1,557 @@
--- Updated 26.12.2024 at 19:36pm GMT +3:00.
--- Added Aimbot Function (Press E to active.) / FOV Aimbot Function (Fov Aimbot Doesnt Work Properly.)
--- Added Traces (Doesnt Even Works Sorry.)
--- Moved To A New Gui (Im Willing to change this gui too.)
--- Added Team-Check Function ( Finally A Working Function After Aimbot!)
--- I Accidentally Deleted Teleport To Player Function I will rewrite it.
--- All Of The Features Are: Noclip, Aimbot, Box-ESP, Name-ESP, Team-Check, WalkSpeed Modifier, JumpPower Modifier, Gravity Modifier.
+-- Updated at 31.12.2024 20:06 PM
+-- Added Silent-Aim (May not work i will fix it)
+-- Added Hitbox Expander (Works Fully)
+-- Changed GUI To Rayfield
+-- Changed Aimbot Technique (May change it back cuz theres no reason)
 
-local Material = loadstring(game:HttpGet('https://raw.githubusercontent.com/Kinlei/MaterialLua/master/Module.lua'))()
-
-local players = game:GetService("Players")
-local player = players.LocalPlayer
-local char = player.Character or player.CharacterAdded:Wait()
-local hum = char:WaitForChild("Humanoid")
+-- Services
+local Rayfield = loadstring(game:HttpGet('https://raw.githubusercontent.com/UI-Interface/CustomFIeld/main/RayField.lua'))()
+local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
-local Workspace = game:GetService("Workspace")
 local UserInputService = game:GetService("UserInputService")
-local boxESPObjects = {}
-local nameESPObjects = {}
-local traceESPObjects = {}
-local boxESPEnabled = false
-local nameESPEnabled = false
-local noclipEnabled = false
-local aimbotEnabled = false
-local fovAimbotEnabled = false
-local fovCircle = Drawing.new("Circle")
-local targetPlayer = nil
-local teamCheckEnabled = false
-local tracesEnabled = false  
+local LocalPlayer = Players.LocalPlayer
+local Mouse = LocalPlayer:GetMouse()
+local Camera = workspace.CurrentCamera
 
-fovCircle.Visible = false
-fovCircle.Color = Color3.fromRGB(255, 0, 0)
-fovCircle.Thickness = 2
-fovCircle.Radius = 100
-fovCircle.Position = Vector2.new(Workspace.CurrentCamera.ViewportSize.X / 2, Workspace.CurrentCamera.ViewportSize.Y / 2)
+local Window = Rayfield:CreateWindow({
+    Name = "Universal Script By NotUgur",
+    LoadingTitle = "Made By NotUgur With Love",
+    LoadingSubtitle = "NotUgur",
+    ConfigurationSaving = {
+        Enabled = false,
+        FolderName = "UniversalScript",
+        FileName = "Config"
+    },
+    Discord = {
+        Enabled = true,
+        Invite = "4bKRus6M",
+        RememberJoins = true
+    }
+})
 
-local function createESP(plr)
-    local box = Drawing.new("Square")
-    box.Visible = false
-    box.Color = Color3.fromRGB(255, 0, 0)
-    box.Thickness = 2
-    box.Filled = false
-    boxESPObjects[plr] = box
+Rayfield:Notify({
+    Title = "Join The Discord",
+    Content = "",
+    Duration = 10,
+    Type = "."
+})
 
-    local nameTag = Drawing.new("Text")
-    nameTag.Visible = false
-    nameTag.Color = Color3.fromRGB(255, 255, 255)
-    nameTag.Text = plr.DisplayName
-    nameTag.Size = 16
-    nameTag.Center = true
-    nameTag.Outline = true
-    nameESPObjects[plr] = nameTag
+-- Combat Tab
+local CombatTab = Window:CreateTab("Combat")
 
-    local trace = Drawing.new("Line")
-    trace.Visible = false
-    trace.Color = Color3.fromRGB(0, 255, 0)
-    trace.Thickness = 2
-    traceESPObjects[plr] = trace
+-- Combat Config
+local CombatConfig = {
+    SilentAim = {
+        Enabled = false,
+        TargetPart = "Head",
+        HitChance = 100
+    },
+    Aimbot = {
+        Enabled = false,
+        TeamCheck = false,
+        TargetPart = "Head",
+        Smoothness = 0.5,
+        Prediction = {
+            Enabled = false,
+            Multiplier = 0.165
+        }
+    },
+    HitboxExpander = {
+        Enabled = false,
+        Size = 30,
+        Transparency = 1,
+        Parts = {"Head", "HumanoidRootPart", "Torso", "Left Arm", "Right Arm", "Left Leg", "Right Leg"}
+    }
+}
 
-    RunService.RenderStepped:Connect(function()
-        if plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
-            local rootPart = plr.Character.HumanoidRootPart
-            local screenPos, onScreen = Workspace.CurrentCamera:WorldToViewportPoint(rootPart.Position)
-            if onScreen then
-                local scaleFactor = 1 / (screenPos.Z / 10)
-                box.Visible = boxESPEnabled and (not teamCheckEnabled or plr.Team ~= player.Team)
-                box.Position = Vector2.new(screenPos.X - 50 * scaleFactor, screenPos.Y - 75 * scaleFactor)
-                box.Size = Vector2.new(100 * scaleFactor, 150 * scaleFactor)
-                nameTag.Visible = nameESPEnabled and (not teamCheckEnabled or plr.Team ~= player.Team)
-                nameTag.Position = Vector2.new(screenPos.X, screenPos.Y - 40 * scaleFactor)
-                if tracesEnabled then
-                    local cameraPos = Workspace.CurrentCamera.CFrame.Position
-                    local traceStart = Workspace.CurrentCamera:WorldToViewportPoint(cameraPos)
-                    local traceEnd = Vector2.new(screenPos.X, screenPos.Y)
-                    trace.Visible = true
-                    trace.From = Vector2.new(traceStart.X, traceStart.Y)
-                    trace.To = Vector2.new(traceEnd.X, traceEnd.Y)
-                else
-                    trace.Visible = false
-                end
-            else
-                box.Visible = false
-                nameTag.Visible = false
-                trace.Visible = false
-            end
-        else
-            box.Visible = false
-            nameTag.Visible = false
-            trace.Visible = false
-        end
-    end)
-end
-
-for _, plr in pairs(players:GetPlayers()) do
-    if plr ~= players.LocalPlayer then
-        createESP(plr)
-    end
-end
-
-players.PlayerAdded:Connect(function(plr)
-    if plr ~= players.LocalPlayer then
-        plr.CharacterAdded:Connect(function()
-            createESP(plr)
-        end)
-    end
-end)
-
-players.PlayerRemoving:Connect(function(plr)
-    if boxESPObjects[plr] then
-        boxESPObjects[plr]:Remove()
-        boxESPObjects[plr] = nil
-    end
-    if nameESPObjects[plr] then
-        nameESPObjects[plr]:Remove()
-        nameESPObjects[plr] = nil
-    end
-    if traceESPObjects[plr] then
-        traceESPObjects[plr]:Remove()
-        traceESPObjects[plr] = nil
-    end
-end)
-
-local function setNoclip(enabled)
-    noclipEnabled = enabled
-    RunService.Stepped:Connect(function()
-        if noclipEnabled then
-            for _, v in pairs(player.Character:GetDescendants()) do
-                if v:IsA("BasePart") and v.CanCollide then
-                    v.CanCollide = false
-                end
-            end
-        end
-    end)
-end
-
-local function setAimbot(enabled)
-    aimbotEnabled = enabled
-    local closestPlayer = nil
-    local shortestDistance = math.huge
-
-    RunService.RenderStepped:Connect(function()
-        if aimbotEnabled then
-            closestPlayer = nil
-            shortestDistance = math.huge
-
-            for _, plr in pairs(players:GetPlayers()) do
-                if plr ~= player and plr.Character and plr.Character:FindFirstChild("Head") and (not teamCheckEnabled or plr.Team ~= player.Team) then
-                    local headPart = plr.Character.Head
-                    local screenPos, onScreen = Workspace.CurrentCamera:WorldToViewportPoint(headPart.Position)
-
-                    if onScreen then
-                        local distance = (Vector2.new(screenPos.X, screenPos.Y) - Vector2.new(Workspace.CurrentCamera.ViewportSize.X / 2, Workspace.CurrentCamera.ViewportSize.Y / 2)).magnitude
-
-                        if distance < shortestDistance then
-                            closestPlayer = plr
-                            shortestDistance = distance
+-- Hitbox Update
+local function UpdateHitboxes()
+    if not CombatConfig.HitboxExpander.Enabled then return end
+    
+    for _, player in pairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer then
+            pcall(function()
+                if player.Character then
+                    for _, partName in pairs(CombatConfig.HitboxExpander.Parts) do
+                        local part = player.Character:FindFirstChild(partName)
+                        if part and part:IsA("BasePart") then
+                            part.Size = Vector3.new(30, 30, 30)
+                            part.Transparency = 1
+                            part.CanCollide = false
                         end
                     end
                 end
-            end
-
-            if closestPlayer then
-                local targetPart = closestPlayer.Character.Head
-                Workspace.CurrentCamera.CFrame = CFrame.new(Workspace.CurrentCamera.CFrame.Position, targetPart.Position)
-            end
+            end)
         end
-    end)
+    end
 end
 
-local function setFOVAimbot(enabled)
-    fovAimbotEnabled = enabled
-    fovCircle.Visible = enabled
-    RunService.RenderStepped:Connect(function()
-        if fovAimbotEnabled then
-            local closestPlayer = nil
-            local shortestDistance = fovCircle.Radius
-            for _, plr in pairs(players:GetPlayers()) do
-                if plr ~= player and plr.Character and plr.Character:FindFirstChild("Head") and (not teamCheckEnabled or plr.Team ~= player.Team) then
-                    local headPart = plr.Character.Head
-                    local screenPos = Workspace.CurrentCamera:WorldToViewportPoint(headPart.Position)
-                    local distance = (Vector2.new(screenPos.X, screenPos.Y) - fovCircle.Position).magnitude
-                    if distance < shortestDistance then
-                        closestPlayer = plr
-                        shortestDistance = distance
+-- Hitbox Reset
+local function ResetHitboxes()
+    for _, player in pairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer then
+            pcall(function()
+                if player.Character then
+                    for _, partName in pairs(CombatConfig.HitboxExpander.Parts) do
+                        local part = player.Character:FindFirstChild(partName)
+                        if part and part:IsA("BasePart") then
+                            if partName == "Head" then
+                                part.Size = Vector3.new(2, 1, 1)
+                            elseif partName == "HumanoidRootPart" then
+                                part.Size = Vector3.new(2, 2, 1)
+                            elseif partName == "Torso" then
+                                part.Size = Vector3.new(2, 2, 1)
+                            else
+                                part.Size = Vector3.new(1, 2, 1)
+                            end
+                            part.Transparency = 0
+                            part.Material = Enum.Material.Plastic
+                            part.BrickColor = player.Character.Torso.BrickColor
+                        end
                     end
                 end
-            end
-            if closestPlayer then
-                targetPlayer = closestPlayer
-                local targetPart = targetPlayer.Character.Head
-                local aimPos = Workspace.CurrentCamera:WorldToViewportPoint(targetPart.Position)
-                mousemoverel((aimPos.X - Workspace.CurrentCamera.ViewportSize.X / 2) / 8, (aimPos.Y - Workspace.CurrentCamera.ViewportSize.Y / 2) / 8)
-            end
+            end)
         end
-    end)
+    end
 end
 
-local UI = Material.Load({
-    Title = "NotUgur Universal Script",
-    Style = 1,
-    SizeX = 300,
-    SizeY = 400,
-    Theme = "Light"
+-- Combat Tab UI Elements
+CombatTab:CreateToggle({
+    Name = "Silent Aim",
+    CurrentValue = false,
+    Flag = "SilentAimToggle",
+    Callback = function(Value)
+        CombatConfig.SilentAim.Enabled = Value
+    end
 })
 
-local Page = UI.New({
-    Title = "Settings"
+CombatTab:CreateToggle({
+    Name = "Aimbot",
+    CurrentValue = false,
+    Flag = "AimbotToggle",
+    Callback = function(Value)
+        CombatConfig.Aimbot.Enabled = Value
+    end
 })
 
-Page.Toggle({
-    Text = "Enable Noclip",
-    Callback = function(v)
-        setNoclip(v)
-    end,
-    Enabled = false
-})
-
-Page.Toggle({
-    Text = "Enable Team Check",
-    Callback = function(v)
-        teamCheckEnabled = v
-    end,
-    Enabled = false
-})
-
-Page.Toggle({
-    Text = "Enable Box ESP",
-    Callback = function(v)
-        boxESPEnabled = v
-        for _, box in pairs(boxESPObjects) do
-            box.Visible = boxESPEnabled
+CombatTab:CreateToggle({
+    Name = "Hitbox Expander",
+    CurrentValue = false,
+    Flag = "HitboxToggle",
+    Callback = function(Value)
+        CombatConfig.HitboxExpander.Enabled = Value
+        if Value then
+            UpdateHitboxes()
+        else
+            ResetHitboxes()
         end
-    end,
-    Enabled = false
+    end
 })
 
-Page.Toggle({
-    Text = "Enable Name ESP",
-    Callback = function(v)
-        nameESPEnabled = v
-        for _, nameTag in pairs(nameESPObjects) do
-            nameTag.Visible = nameESPEnabled
+-- ESP Ayarları
+local ESPConfig = {
+    Enabled = false,
+    BoxESP = false,
+    NameESP = false,
+    TracerESP = false,
+    TeamCheck = false,
+    BoxColor = Color3.fromRGB(255, 255, 255),
+    TracerColor = Color3.fromRGB(255, 255, 255),
+    TextColor = Color3.fromRGB(255, 255, 255)
+}
+
+-- ESP Çizimleri
+local ESP = {
+    Boxes = {},
+    Names = {},
+    Tracers = {}
+}
+
+-- ESP Fonksiyonları
+local function CreateESPBox(player)
+    local box = Drawing.new("Square")
+    box.Visible = false
+    box.Color = ESPConfig.BoxColor
+    box.Thickness = 1
+    box.Transparency = 1
+    box.Filled = false
+    ESP.Boxes[player] = box
+    
+    local name = Drawing.new("Text")
+    name.Visible = false
+    name.Color = ESPConfig.TextColor
+    name.Size = 14
+    name.Center = true
+    name.Outline = true
+    ESP.Names[player] = name
+    
+    local tracer = Drawing.new("Line")
+    tracer.Visible = false
+    tracer.Color = ESPConfig.TracerColor
+    tracer.Thickness = 1
+    tracer.Transparency = 1
+    ESP.Tracers[player] = tracer
+end
+
+-- ESP Temizleme
+local function CleanupESP(player)
+    if ESP.Boxes[player] then
+        ESP.Boxes[player]:Remove()
+        ESP.Boxes[player] = nil
+    end
+    if ESP.Names[player] then
+        ESP.Names[player]:Remove()
+        ESP.Names[player] = nil
+    end
+    if ESP.Tracers[player] then
+        ESP.Tracers[player]:Remove()
+        ESP.Tracers[player] = nil
+    end
+end
+
+-- ESP Update
+local function UpdateESP()
+    for _, player in pairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer then
+            if ESPConfig.TeamCheck and player.Team == LocalPlayer.Team then
+                if ESP.Boxes[player] then ESP.Boxes[player].Visible = false end
+                if ESP.Names[player] then ESP.Names[player].Visible = false end
+                if ESP.Tracers[player] then ESP.Tracers[player].Visible = false end
+                continue
+            end
+            
+            if not ESP.Boxes[player] then
+                CreateESPBox(player)
+            end
+            
+            if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+                local hrp = player.Character.HumanoidRootPart
+                local head = player.Character:FindFirstChild("Head")
+                if not head then continue end
+                
+                local Vector, OnScreen = Camera:WorldToViewportPoint(hrp.Position)
+                if OnScreen then
+                    -- Box ESP
+                    if ESPConfig.BoxESP then
+                        local box = ESP.Boxes[player]
+                        box.Size = Vector2.new(1000 / Vector.Z, 2000 / Vector.Z)
+                        box.Position = Vector2.new(Vector.X - box.Size.X / 2, Vector.Y - box.Size.Y / 2)
+                        box.Visible = true
+                    else
+                        ESP.Boxes[player].Visible = false
+                    end
+                    
+                    -- Name ESP
+                    if ESPConfig.NameESP then
+                        local name = ESP.Names[player]
+                        name.Position = Vector2.new(Vector.X, Vector.Y - 40)
+                        name.Text = player.Name
+                        name.Visible = true
+                    else
+                        ESP.Names[player].Visible = false
+                    end
+                    
+                    -- Tracer ESP
+                    if ESPConfig.TracerESP then
+                        local tracer = ESP.Tracers[player]
+                        tracer.From = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y)
+                        tracer.To = Vector2.new(Vector.X, Vector.Y)
+                        tracer.Visible = true
+                    else
+                        ESP.Tracers[player].Visible = false
+                    end
+                else
+                    ESP.Boxes[player].Visible = false
+                    ESP.Names[player].Visible = false
+                    ESP.Tracers[player].Visible = false
+                end
+            end
         end
-    end,
-    Enabled = false
+    end
+end
+
+-- ESP Tab
+local VisualsTab = Window:CreateTab("Visuals")
+
+VisualsTab:CreateToggle({
+    Name = "ESP Enabled",
+    CurrentValue = false,
+    Flag = "ESPEnabled",
+    Callback = function(Value)
+        ESPConfig.Enabled = Value
+    end
 })
 
-Page.Toggle({
-    Text = "Enable Traces",
-    Callback = function(v)
-        tracesEnabled = v
-        for _, trace in pairs(traceESPObjects) do
-            trace.Visible = tracesEnabled
+VisualsTab:CreateToggle({
+    Name = "Box ESP",
+    CurrentValue = false,
+    Flag = "BoxESP",
+    Callback = function(Value)
+        ESPConfig.BoxESP = Value
+    end
+})
+
+VisualsTab:CreateToggle({
+    Name = "Name ESP",
+    CurrentValue = false,
+    Flag = "NameESP",
+    Callback = function(Value)
+        ESPConfig.NameESP = Value
+    end
+})
+
+VisualsTab:CreateToggle({
+    Name = "Tracer ESP",
+    CurrentValue = false,
+    Flag = "TracerESP",
+    Callback = function(Value)
+        ESPConfig.TracerESP = Value
+    end
+})
+
+VisualsTab:CreateToggle({
+    Name = "Team Check",
+    CurrentValue = false,
+    Flag = "ESPTeamCheck",
+    Callback = function(Value)
+        ESPConfig.TeamCheck = Value
+    end
+})
+
+-- ESP Update Loop
+RunService.RenderStepped:Connect(function()
+    if ESPConfig.Enabled then
+        UpdateESP()
+    end
+end)
+
+-- Player Events for ESP
+Players.PlayerAdded:Connect(function(player)
+    if ESPConfig.Enabled then
+        CreateESPBox(player)
+    end
+end)
+
+Players.PlayerRemoving:Connect(function(player)
+    CleanupESP(player)
+end)
+
+-- Movement Config ekle
+local MovementConfig = {
+    WalkSpeed = {
+        Enabled = false,
+        Speed = 16
+    },
+    JumpPower = {
+        Enabled = false,
+        Power = 50
+    },
+    Gravity = {
+        Enabled = false,
+        Value = 196.2
+    },
+    Fly = {
+        Enabled = false,
+        Speed = 50
+    },
+    Noclip = {
+        Enabled = false
+    }
+}
+
+-- Silent Aim function
+local function GetClosestPlayer()
+    local MaxDistance = math.huge
+    local Target = nil
+    
+    for _, player in pairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+            local pos = Camera:WorldToViewportPoint(player.Character.HumanoidRootPart.Position)
+            local magnitude = (Vector2.new(pos.X, pos.Y) - Vector2.new(Mouse.X, Mouse.Y)).magnitude
+            
+            if magnitude < MaxDistance then
+                MaxDistance = magnitude
+                Target = player.Character.HumanoidRootPart
+            end
         end
-    end,
-    Enabled = false
-})
+    end
+    
+    return Target
+end
 
-Page.Toggle({
-    Text = "Enable Aimbot",
-    Callback = function(v)
-        setAimbot(v)
-    end,
-    Enabled = false
-})
+-- Silent Aim Hook
+local oldNameCall = nil
+oldNameCall = hookmetamethod(game, "__namecall", newcclosure(function(self, ...)
+    local Args = {...}
+    local Method = getnamecallmethod()
+    
+    if CombatConfig.SilentAim.Enabled and (Method == "FindPartOnRayWithIgnoreList" or Method == "Raycast") then
+        local Target = GetClosestPlayer()
+        if Target then
+            Args[1] = Ray.new(Camera.CFrame.Position, (Target.Position - Camera.CFrame.Position).Unit * 1000)
+            return oldNameCall(self, unpack(Args))
+        end
+    end
+    
+    return oldNameCall(self, ...)
+end))
 
-Page.Toggle({
-    Text = "Enable FOV Aimbot",
-    Callback = function(v)
-        setFOVAimbot(v)
-    end,
-    Enabled = false
-})
+-- Aimbot Update
+RunService.RenderStepped:Connect(function()
+    if CombatConfig.Aimbot.Enabled then
+        local Target = GetClosestPlayer()
+        if Target then
+            local TargetPos = Target.Position
+            if CombatConfig.Aimbot.Prediction.Enabled then
+                TargetPos = TargetPos + (Target.Velocity * CombatConfig.Aimbot.Prediction.Multiplier)
+            end
+            Camera.CFrame = Camera.CFrame:Lerp(CFrame.new(Camera.CFrame.Position, TargetPos), CombatConfig.Aimbot.Smoothness)
+        end
+    end
+end)
 
-Page.Slider({
-    Text = "Walk Speed",
-    Min = 0,
-    Max = 500,
-    Def = hum.WalkSpeed,
-    Callback = function(value)
-        hum.WalkSpeed = value
+-- Movement Tab
+local MovementTab = Window:CreateTab("Movement")
+
+MovementTab:CreateToggle({
+    Name = "WalkSpeed",
+    CurrentValue = false,
+    Flag = "WalkSpeedToggle",
+    Callback = function(Value)
+        MovementConfig.WalkSpeed.Enabled = Value
     end
 })
 
-Page.Slider({
-    Text = "Jump Power",
-    Min = 0,
-    Max = 500,
-    Def = hum.JumpPower,
-    Callback = function(value)
-        hum.JumpPower = value
+MovementTab:CreateSlider({
+    Name = "WalkSpeed Value",
+    Range = {16, 500},
+    Increment = 1,
+    Suffix = "Speed",
+    CurrentValue = 16,
+    Flag = "WalkSpeedSlider",
+    Callback = function(Value)
+        MovementConfig.WalkSpeed.Speed = Value
     end
 })
 
-Page.Slider({
-    Text = "Gravity",
-    Min = 0,
-    Max = 500,
-    Def = workspace.Gravity,
-    Callback = function(value)
-        workspace.Gravity = value
+MovementTab:CreateToggle({
+    Name = "JumpPower",
+    CurrentValue = false,
+    Flag = "JumpPowerToggle",
+    Callback = function(Value)
+        MovementConfig.JumpPower.Enabled = Value
     end
 })
 
-Page.Slider({
-    Text = "FOV Radius",
-    Min = 50,
-    Max = 300,
-    Def = fovCircle.Radius,
-    Callback = function(value)
-        fovCircle.Radius = value
+MovementTab:CreateSlider({
+    Name = "JumpPower Value",
+    Range = {50, 500},
+    Increment = 1,
+    Suffix = "Power",
+    CurrentValue = 50,
+    Flag = "JumpPowerSlider",
+    Callback = function(Value)
+        MovementConfig.JumpPower.Power = Value
     end
 })
 
-local aimbotKey = Enum.KeyCode.E 
-UserInputService.InputBegan:Connect(function(input)
-    if input.KeyCode == aimbotKey then
-        aimbotEnabled = not aimbotEnabled
+MovementTab:CreateToggle({
+    Name = "Fly",
+    CurrentValue = false,
+    Flag = "FlyToggle",
+    Callback = function(Value)
+        MovementConfig.Fly.Enabled = Value
+    end
+})
+
+MovementTab:CreateSlider({
+    Name = "Fly Speed",
+    Range = {1, 500},
+    Increment = 1,
+    Suffix = "Speed",
+    CurrentValue = 50,
+    Flag = "FlySpeedSlider",
+    Callback = function(Value)
+        MovementConfig.Fly.Speed = Value
+    end
+})
+
+MovementTab:CreateToggle({
+    Name = "Noclip",
+    CurrentValue = false,
+    Flag = "NoclipToggle",
+    Callback = function(Value)
+        MovementConfig.Noclip.Enabled = Value
+    end
+})
+
+-- Movement Update
+RunService.Heartbeat:Connect(function()
+    if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
+        local Humanoid = LocalPlayer.Character.Humanoid
+        
+        -- WalkSpeed
+        if MovementConfig.WalkSpeed.Enabled then
+            Humanoid.WalkSpeed = MovementConfig.WalkSpeed.Speed
+        end
+        
+        -- JumpPower
+        if MovementConfig.JumpPower.Enabled then
+            Humanoid.JumpPower = MovementConfig.JumpPower.Power
+        end
+        
+        -- Fly
+        if MovementConfig.Fly.Enabled then
+            local RootPart = LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+            if RootPart then
+                local Direction = Vector3.new(0, 0, 0)
+                if UserInputService:IsKeyDown(Enum.KeyCode.W) then
+                    Direction = Direction + Camera.CFrame.LookVector
+                end
+                if UserInputService:IsKeyDown(Enum.KeyCode.S) then
+                    Direction = Direction - Camera.CFrame.LookVector
+                end
+                if UserInputService:IsKeyDown(Enum.KeyCode.A) then
+                    Direction = Direction - Camera.CFrame.RightVector
+                end
+                if UserInputService:IsKeyDown(Enum.KeyCode.D) then
+                    Direction = Direction + Camera.CFrame.RightVector
+                end
+                if UserInputService:IsKeyDown(Enum.KeyCode.Space) then
+                    Direction = Direction + Vector3.new(0, 1, 0)
+                end
+                if UserInputService:IsKeyDown(Enum.KeyCode.LeftControl) then
+                    Direction = Direction - Vector3.new(0, 1, 0)
+                end
+                RootPart.Velocity = Direction.Unit * MovementConfig.Fly.Speed
+            end
+        end
+        
+        -- Noclip
+        if MovementConfig.Noclip.Enabled then
+            for _, part in pairs(LocalPlayer.Character:GetDescendants()) do
+                if part:IsA("BasePart") then
+                    part.CanCollide = false
+                end
+            end
+        end
+    end
+end)
+
+-- Hitbox Update Loop
+RunService.Heartbeat:Connect(function()
+    if CombatConfig.HitboxExpander.Enabled then
+        UpdateHitboxes()
+    end
+end)
+
+-- Player Added Event için Hitbox kontrolü
+Players.PlayerAdded:Connect(function(player)
+    if CombatConfig.HitboxExpander.Enabled then
+        player.CharacterAdded:Connect(function(character)
+            task.wait(1)
+            UpdateHitboxes()
+        end)
     end
 end)
 
